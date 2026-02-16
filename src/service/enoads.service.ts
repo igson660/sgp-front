@@ -11,20 +11,24 @@ export const listEnoadRequest = async (): Promise<
   IPaginated<IEnoadResponse>
 > => {
   try {
-    return await api.url("enoad/").get().json<IPaginated<IEnoadResponse>>();
+    return await api.url("enoads/").get().json<IPaginated<IEnoadResponse>>();
   } catch {
-    toast.error("Erro ao carregar igrejas.");
+    toast.error("Erro ao carregar ENOADs.");
     throw new Error("LIST_Enoad_ERROR");
   }
 };
 
 export const retrieveEnoadRequest = async (
   id: string
-): Promise<IEnoadResponse> => {
+): Promise<IEnoadCreate> => {
   try {
-    return await api.url(`enoad/${id}/`).get().json<IEnoadResponse>();
+    const response = await api
+      .url(`enoads/${id}/`)
+      .get()
+      .json<IEnoadResponse>();
+    return response.data;
   } catch {
-    toast.error("Erro ao carregar igreja.");
+    toast.error("Erro ao carregar ENOAD.");
     throw new Error("RETRIEVE_Enoad_ERROR");
   }
 };
@@ -45,18 +49,18 @@ export const updateEnoadRequest = async (
   data: Partial<IEnoadCreate>
 ): Promise<IEnoadResponse> => {
   try {
-    return await api.url(`enoad/${id}/`).patch(data).json<IEnoadResponse>();
+    return await api.url(`enoads/${id}/`).patch(data).json<IEnoadResponse>();
   } catch {
-    toast.error("Erro ao atualizar igreja.");
+    toast.error("Erro ao atualizar ENOAD.");
     throw new Error("UPDATE_Enoad_ERROR");
   }
 };
 
 export const deleteEnoadRequest = async (id: string): Promise<void> => {
   try {
-    await api.url(`enoad/${id}/`).delete().res();
+    await api.url(`enoads/${id}/`).delete().res();
   } catch {
-    toast.error("Erro ao deletar igreja.");
+    toast.error("Erro ao deletar ENOAD.");
     throw new Error("DELETE_Enoad_ERROR");
   }
 };

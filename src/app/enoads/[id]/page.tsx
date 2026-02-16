@@ -1,22 +1,37 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { IMaskInput } from "react-imask";
+import toast from "react-hot-toast";
 
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
-import { createEnoadRequest } from "@/service/enoads.service";
+import {
+  retrieveEnoadRequest,
+  updateEnoadRequest,
+} from "@/service/enoads.service";
 import { useCepAutoFill } from "@/shared/hooks/useCep";
 import { globalSchema } from "@/shared/schemas/global.schema";
-import { cleanCharacter, formatDateToISO } from "@/shared/utils/formatData";
+import {
+  formatDateToISO,
+  formatDateFromISO,
+  getSingleParam,
+  cleanCharacter,
+} from "@/shared/utils/formatData";
+import type { IEnoadCreate } from "@/shared/types/models/enoads.model";
 
 type FormData = z.infer<typeof globalSchema>;
 
-export default function CreateEnoadPage() {
+export default function UpdateEnoadPage() {
   const router = useRouter();
+  const params = useParams();
+  const enoadId = getSingleParam(params.id);
+
+  const [loadingData, setLoadingData] = useState(true);
 
   const {
     register,
@@ -48,15 +63,36 @@ export default function CreateEnoadPage() {
   const { handleCepChange, loading: loadingCep } =
     useCepAutoFill<FormData>(setValue);
 
+  useEffect(() => {
+    const loadEnoad = async () => {
+      try {
+        const response = await retrieveEnoadRequest(enoadId);
+        const data: IEnoadCreate = {
+          ...response,
+          foundation_date: formatDateFromISO(response.foundation_date),
+          phone: response.phone,
+        };
+        Object.entries(data).forEach(([key, value]) => {
+          setValue(key as any, value);
+        });
+      } catch {
+        toast.error("Erro ao carregar ENOAD.");
+      } finally {
+        setLoadingData(false);
+      }
+    };
+    loadEnoad();
+  }, [enoadId, setValue]);
+
   const onSubmit = async (data: FormData) => {
-    const payload = {
+    const payload: IEnoadCreate = {
       ...data,
       foundation_date: formatDateToISO(data.foundation_date),
       phone: cleanCharacter(data.phone),
       cnpj: cleanCharacter(data.cnpj),
     };
     try {
-      await createEnoadRequest(payload);
+      await updateEnoadRequest(enoadId, payload);
       router.push("/enoads");
     } catch {}
   };
@@ -67,11 +103,13 @@ export default function CreateEnoadPage() {
     </p>
   );
 
+  if (loadingData) return <p className="p-8">Carregando ENOAD...</p>;
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="ml-64 flex-1">
-        <Header title="Novo ENOAD" />
+        <Header title="Editar ENOAD" />
 
         <div className="p-8">
           <form
@@ -98,7 +136,7 @@ export default function CreateEnoadPage() {
                     <IMaskInput
                       {...field}
                       mask="00.000.000/0000-00"
-                      onAccept={(value: string) => field.onChange(value)}
+                      onAccept={value => field.onChange(value)}
                       placeholder="CNPJ"
                       className={`w-full rounded-lg border p-2 ${
                         errors.cnpj ? "border-red-500" : "border-gray-300"
@@ -117,7 +155,7 @@ export default function CreateEnoadPage() {
                     <IMaskInput
                       {...field}
                       mask="00/00/0000"
-                      onAccept={(value: string) => field.onChange(value)}
+                      onAccept={value => field.onChange(value)}
                       placeholder="Data de fundação"
                       className={`w-full rounded-lg border p-2 ${
                         errors.foundation_date
@@ -149,7 +187,7 @@ export default function CreateEnoadPage() {
                     <IMaskInput
                       {...field}
                       mask="(00) 00000-0000"
-                      onAccept={(value: string) => field.onChange(value)}
+                      onAccept={value => field.onChange(value)}
                       placeholder="Telefone"
                       className={`w-full rounded-lg border p-2 ${
                         errors.phone ? "border-red-500" : "border-gray-300"
@@ -177,36 +215,34 @@ export default function CreateEnoadPage() {
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Endereço</h2>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                <div className="md:col-span-2 flex flex-col">
-                  <Controller
-                    control={control}
-                    name="address.zip_code"
-                    render={({ field }) => (
-                      <div className="flex flex-col md:col-span-2">
-                        <IMaskInput
-                          {...field}
-                          mask="00000-000"
-                          placeholder="CEP"
-                          onAccept={(value: string) => {
-                            field.onChange(value);
-                            handleCepChange(value); // chama a API para auto-fill
-                          }}
-                          className={`w-full rounded-lg border p-2 ${
-                            errors.address?.zip_code
-                              ? "border-red-500"
-                              : "border-gray-300"
-                          }`}
-                        />
-                        {renderError(errors.address?.zip_code)}
-                        {loadingCep && (
-                          <p className="mt-1 text-sm text-gray-500">
-                            Buscando endereço...
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  />
-                </div>
+                <Controller
+                  control={control}
+                  name="address.zip_code"
+                  render={({ field }) => (
+                    <div className="flex flex-col md:col-span-2">
+                      <IMaskInput
+                        {...field}
+                        mask="00000-000"
+                        placeholder="CEP"
+                        onAccept={value => {
+                          field.onChange(value);
+                          handleCepChange(value);
+                        }}
+                        className={`w-full rounded-lg border p-2 ${
+                          errors.address?.zip_code
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      />
+                      {renderError(errors.address?.zip_code)}
+                      {loadingCep && (
+                        <p className="mt-1 text-sm text-gray-500">
+                          Buscando endereço...
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
 
                 <div className="flex flex-col">
                   <input
@@ -297,7 +333,7 @@ export default function CreateEnoadPage() {
               disabled={isSubmitting}
               className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? "Cadastrando..." : "Cadastrar ENOAD"}
+              {isSubmitting ? "Atualizando..." : "Atualizar ENOAD"}
             </button>
           </form>
         </div>
