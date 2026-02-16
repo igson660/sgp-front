@@ -1,0 +1,4 @@
+export const DEV_API_URL = process.env.NEXT_PUBLIC_DEV_API_URL;
+export const PROD_API_URL = process.env.NEXT_PUBLIC_PROD_API_URL;
+
+export const SESSION_COOKIE_KEY = process.env.NEXT_PUBLIC_SESSION_COOKIE_KEY;
