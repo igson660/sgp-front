@@ -10,10 +10,10 @@ import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { createEnoadRequest } from "@/service/enoads.service";
 import { useCepAutoFill } from "@/shared/hooks/useCep";
-import { globalSchema } from "@/shared/schemas/global.schema";
 import { cleanCharacter, formatDateToISO } from "@/shared/utils/formatData";
+import { enoadSchema } from "@/shared/schemas/enoad.schema";
 
-type FormData = z.infer<typeof globalSchema>;
+type FormData = z.infer<typeof enoadSchema>;
 
 export default function CreateEnoadPage() {
   const router = useRouter();
@@ -25,7 +25,7 @@ export default function CreateEnoadPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(globalSchema),
+    resolver: zodResolver(enoadSchema),
     defaultValues: {
       name: "",
       cnpj: "",
@@ -189,7 +189,7 @@ export default function CreateEnoadPage() {
                           placeholder="CEP"
                           onAccept={(value: string) => {
                             field.onChange(value);
-                            handleCepChange(value); // chama a API para auto-fill
+                            handleCepChange(value);
                           }}
                           className={`w-full rounded-lg border p-2 ${
                             errors.address?.zip_code

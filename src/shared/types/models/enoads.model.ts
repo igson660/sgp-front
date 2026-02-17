@@ -1,4 +1,8 @@
-import { IAddressCreate } from "./address.model";
+import {
+  IAddressCreate,
+  IAddressResponse,
+  IAddressResponseList,
+} from "./address.model";
 
 export interface IEnoadBase {
   readonly name: string;
@@ -9,33 +13,29 @@ export interface IEnoadBase {
   readonly status: "active" | "inactive";
 }
 
-export interface IEnoad extends IEnoadBase {
+export interface IEnoadItem extends IEnoadBase {
   readonly id: string;
+  readonly address: IAddressResponseList | IAddressResponse;
+}
+
+export interface IEnoadData {
+  readonly count: number;
+  readonly next: string | null;
+  readonly previous: string | null;
+  readonly results: IEnoadItem[];
+  readonly total_pages: number;
 }
 
 export interface IEnoadCreate extends IEnoadBase {
   readonly address: IAddressCreate;
 }
 
-export interface IAddressResponse {
-  readonly id: string;
-  readonly zip_code: string;
-  readonly address: string;
-  readonly address_number: string;
-  readonly address_complement: string;
-  readonly state: string;
-  readonly city: string;
-  readonly country: string;
-}
-
 export interface IEnoadResponse {
   readonly status: "success";
-  readonly data: IEnoad & { address: IAddressResponse };
+  readonly data: IEnoadData;
 }
 
-export interface IPaginatedResponse<T> {
-  readonly count: number;
-  readonly next: string | null;
-  readonly previous: string | null;
-  readonly results: readonly T[];
+export interface IEnoadResponseDetails {
+  readonly status: "success";
+  readonly data: IEnoadItem;
 }

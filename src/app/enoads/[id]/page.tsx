@@ -68,10 +68,10 @@ export default function UpdateEnoadPage() {
       try {
         const response = await retrieveEnoadRequest(enoadId);
         const data: IEnoadCreate = {
-          ...response,
-          foundation_date: formatDateFromISO(response.foundation_date),
-          phone: response.phone,
+          ...response.data,
+          foundation_date: formatDateFromISO(response.data.foundation_date),
         };
+
         Object.entries(data).forEach(([key, value]) => {
           setValue(key as any, value);
         });

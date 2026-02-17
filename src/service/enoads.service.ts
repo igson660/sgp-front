@@ -1,32 +1,36 @@
 import {
   IEnoadCreate,
   IEnoadResponse,
+  IEnoadResponseDetails,
 } from "@/shared/types/models/enoads.model";
-import { IPaginated } from "@/shared/types/models/global.model";
 import toast from "react-hot-toast";
 
 import { api } from "src/config/sgpCore";
 
-export const listEnoadRequest = async (): Promise<
-  IPaginated<IEnoadResponse>
-> => {
+export const listEnoadRequest = async ({
+  search = "",
+}: {
+  search: string;
+}): Promise<IEnoadResponse> => {
   try {
-    return await api.url("enoads/").get().json<IPaginated<IEnoadResponse>>();
+    const query = new URLSearchParams();
+    if (search) query.append("search", search);
+
+    return await api
+      .url(`enoads/?${query.toString()}&page/`)
+      .get()
+      .json<IEnoadResponse>();
   } catch {
     toast.error("Erro ao carregar ENOADs.");
-    throw new Error("LIST_Enoad_ERROR");
+    throw new Error("LIST_ENOAD_ERROR");
   }
 };
 
 export const retrieveEnoadRequest = async (
   id: string
-): Promise<IEnoadCreate> => {
+): Promise<IEnoadResponseDetails> => {
   try {
-    const response = await api
-      .url(`enoads/${id}/`)
-      .get()
-      .json<IEnoadResponse>();
-    return response.data;
+    return await api.url(`enoads/${id}/`).get().json<IEnoadResponseDetails>();
   } catch {
     toast.error("Erro ao carregar ENOAD.");
     throw new Error("RETRIEVE_Enoad_ERROR");
@@ -37,6 +41,7 @@ export const createEnoadRequest = async (
   data: IEnoadCreate
 ): Promise<IEnoadResponse> => {
   try {
+    toast.success("ENOAD criado com sucesso");
     return await api.url("enoads/").post(data).json<IEnoadResponse>();
   } catch {
     toast.error("Erro ao cadastrar ENOAD.");
@@ -49,6 +54,7 @@ export const updateEnoadRequest = async (
   data: Partial<IEnoadCreate>
 ): Promise<IEnoadResponse> => {
   try {
+    toast.success("ENOAD atualizado com sucesso");
     return await api.url(`enoads/${id}/`).patch(data).json<IEnoadResponse>();
   } catch {
     toast.error("Erro ao atualizar ENOAD.");
@@ -58,6 +64,7 @@ export const updateEnoadRequest = async (
 
 export const deleteEnoadRequest = async (id: string): Promise<void> => {
   try {
+    toast.success("ENOAD excluido com sucesso");
     await api.url(`enoads/${id}/`).delete().res();
   } catch {
     toast.error("Erro ao deletar ENOAD.");
