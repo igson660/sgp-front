@@ -39,3 +39,8 @@ export interface IEnoadResponseDetails {
   readonly status: "success";
   readonly data: IEnoadItem;
 }
+
+export interface IEnoadResponseList {
+  readonly id: string;
+  readonly name: string;
+}
