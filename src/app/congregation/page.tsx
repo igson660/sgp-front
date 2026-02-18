@@ -1,14 +1,17 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { EntityCard } from "@/components/dashboard/EntityCard";
-import Link from "next/link";
-import { useEffect, useRef } from "react";
 import { listCongregationRequest } from "@/service/congregation.service";
 
 export default function CongregacoesPage() {
+  const router = useRouter();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -26,19 +29,25 @@ export default function CongregacoesPage() {
       initialPageParam: 1,
     });
 
-  const todasCongregacoes =
-    data?.pages.flatMap(page => page.data.results) ?? [];
+  const congregacoes = data?.pages.flatMap(page => page.data.results) ?? [];
 
   useEffect(() => {
-    if (!loadMoreRef.current || !hasNextPage) return;
+    if (!loadMoreRef.current) return;
 
     const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) fetchNextPage();
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
     });
 
     observer.observe(loadMoreRef.current);
+
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage]);
+
+  const handleViewCongregation = (id: string) => {
+    router.push(`/congregation/view/${id}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -56,36 +65,32 @@ export default function CongregacoesPage() {
               + Nova Congregação
             </Link>
           </div>
+
           <section>
             <h2 className="mb-4 text-xl font-bold text-gray-900">
               Lista de Congregações
             </h2>
 
             {isLoading ? (
-              <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-                <p className="text-gray-600">Carregando congregações...</p>
-              </div>
-            ) : todasCongregacoes.length > 0 ? (
+              <p>Carregando...</p>
+            ) : congregacoes.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {todasCongregacoes.map(congregacao => (
+                  {congregacoes.map(congregacao => (
                     <EntityCard
                       key={congregacao.id}
                       id={congregacao.id}
                       nome={congregacao.name}
                       level="congregation"
+                      descricao={`${congregacao.regional?.name ?? ""} • ${congregacao.address?.city ?? ""}`}
+                      onClick={handleViewCongregation}
                     />
                   ))}
                 </div>
 
-                {/* Trigger do scroll infinito */}
-                {hasNextPage && (
-                  <div ref={loadMoreRef} className="py-10 text-center">
-                    {isFetchingNextPage
-                      ? "Carregando mais..."
-                      : "Role para carregar mais"}
-                  </div>
-                )}
+                <div ref={loadMoreRef} className="mt-6 text-center">
+                  {isFetchingNextPage && <p>Carregando mais...</p>}
+                </div>
               </>
             ) : (
               <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">

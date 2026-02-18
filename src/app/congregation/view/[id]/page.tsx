@@ -6,85 +6,89 @@ import Link from "next/link";
 
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
-import { retrievePeopleRequest } from "@/service/people.service";
-import { formatCPF, formatPhone } from "@/shared/utils/formatData";
+import { retrieveCongregationRequest } from "@/service/congregation.service";
+import { formatCNPJ, formatPhone } from "@/shared/utils/formatData";
 
-export default function MemberViewPage() {
+export default function CongregationViewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["member", id],
-    queryFn: () => retrievePeopleRequest(id),
+    queryKey: ["congregation", id],
+    queryFn: () => retrieveCongregationRequest(id),
     enabled: !!id,
   });
 
-  const member = data?.data;
+  const congregation = data?.data;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
 
       <main className="ml-64 flex-1">
-        <Header title="Visualizar Membro" />
+        <Header title="Visualizar Congregação" />
 
         <div className="p-8">
           {isLoading ? (
             <p>Carregando...</p>
-          ) : !member ? (
+          ) : !congregation ? (
             <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-              <p className="text-gray-600">Membro não encontrado.</p>
+              <p className="text-gray-600">Congregação não encontrada.</p>
             </div>
           ) : (
             <div className="space-y-6">
               {/* Ações */}
               <div className="flex justify-end gap-3">
                 <button
-                  onClick={() => router.push("/member")}
+                  onClick={() => router.push("/congregation")}
                   className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
                 >
                   Voltar
                 </button>
 
                 <Link
-                  href={`/member/${member.id}`}
+                  href={`/congregation/${congregation.id}`}
                   className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
                 >
                   Editar
                 </Link>
               </div>
 
-              {/* Informações pessoais */}
+              {/* Informações da Congregação */}
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <h2 className="mb-6 text-xl font-semibold text-gray-900">
-                  Informações do Membro
+                  Informações da Congregação
                 </h2>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <p className="text-sm font-medium text-gray-500">Nome</p>
-                    <p className="mt-1 text-gray-900">{member.name || "-"}</p>
+                    <p className="mt-1 text-gray-900">
+                      {congregation.name || "-"}
+                    </p>
                   </div>
 
                   <div>
-                    <p className="text-sm font-medium text-gray-500">CPF</p>
+                    <p className="text-sm font-medium text-gray-500">CNPJ</p>
                     <p className="mt-1 text-gray-900">
-                      {formatCPF(member.cpf) || "-"}
+                      {formatCNPJ(congregation.cnpj) || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">
-                      Data de nascimento
+                      Data de fundação
                     </p>
                     <p className="mt-1 text-gray-900">
-                      {member.birth_date || "-"}
+                      {congregation.foundation_date || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p className="mt-1 text-gray-900">{member.email || "-"}</p>
+                    <p className="mt-1 text-gray-900">
+                      {congregation.email || "-"}
+                    </p>
                   </div>
 
                   <div>
@@ -92,29 +96,29 @@ export default function MemberViewPage() {
                       Telefone
                     </p>
                     <p className="mt-1 text-gray-900">
-                      {formatPhone(member.phone) || "-"}
+                      {formatPhone(congregation.phone) || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">Status</p>
                     <p className="mt-1 text-gray-900">
-                      {member.status === "active" ? "Ativo" : "Inativo"}
+                      {congregation.status === "active" ? "Ativa" : "Inativa"}
                     </p>
                   </div>
                 </div>
               </div>
 
-              {/* Congregação */}
+              {/* Regional */}
               <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
                 <h2 className="mb-6 text-xl font-semibold text-gray-900">
-                  Congregação
+                  Regional
                 </h2>
 
                 <div>
                   <p className="text-sm font-medium text-gray-500">Nome</p>
                   <p className="mt-1 text-gray-900">
-                    {member.congregation?.name || "-"}
+                    {congregation.regional?.name || "-"}
                   </p>
                 </div>
               </div>
@@ -129,21 +133,21 @@ export default function MemberViewPage() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">CEP</p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.zip_code || "-"}
+                      {congregation.address?.zip_code || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">Rua</p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.address || "-"}
+                      {congregation.address?.address || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">Número</p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.address_number || "-"}
+                      {congregation.address?.address_number || "-"}
                     </p>
                   </div>
 
@@ -152,28 +156,28 @@ export default function MemberViewPage() {
                       Complemento
                     </p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.address_complement || "-"}
+                      {congregation.address?.address_complement || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">Cidade</p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.city || "-"}
+                      {congregation.address?.city || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">Estado</p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.state || "-"}
+                      {congregation.address?.state || "-"}
                     </p>
                   </div>
 
                   <div>
                     <p className="text-sm font-medium text-gray-500">País</p>
                     <p className="mt-1 text-gray-900">
-                      {member.address?.country || "-"}
+                      {congregation.address?.country || "-"}
                     </p>
                   </div>
                 </div>
