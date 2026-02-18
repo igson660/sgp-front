@@ -1,21 +1,21 @@
 "use client";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import Link from "next/link";
+
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { EntityCard } from "@/components/dashboard/EntityCard";
-import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { listCongregationRequest } from "@/service/congregation.service";
+import { listPeopleRequest } from "@/service/people.service";
 
-export default function CongregacoesPage() {
+export default function MembrosPage() {
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useInfiniteQuery({
-      queryKey: ["congregations"],
-      queryFn: ({ pageParam = 1 }) =>
-        listCongregationRequest({ page: pageParam }),
+      queryKey: ["members"],
+      queryFn: ({ pageParam = 1 }) => listPeopleRequest({ page: pageParam }),
       getNextPageParam: lastPage => {
         const next = lastPage.data.next;
         if (!next) return undefined;
@@ -26,17 +26,19 @@ export default function CongregacoesPage() {
       initialPageParam: 1,
     });
 
-  const todasCongregacoes =
-    data?.pages.flatMap(page => page.data.results) ?? [];
+  const membros = data?.pages.flatMap(page => page.data.results) ?? [];
 
   useEffect(() => {
-    if (!loadMoreRef.current || !hasNextPage) return;
+    if (!loadMoreRef.current) return;
 
     const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) fetchNextPage();
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
     });
 
     observer.observe(loadMoreRef.current);
+
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage]);
 
@@ -45,53 +47,46 @@ export default function CongregacoesPage() {
       <Sidebar />
 
       <main className="ml-64 flex-1">
-        <Header title="Congregações" />
+        <Header title="Membros" />
 
         <div className="p-8">
           <div className="mb-6 flex justify-end">
             <Link
-              href="/congregation/create"
+              href="/member/create"
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
             >
-              + Nova Congregação
+              + Novo Membro
             </Link>
           </div>
+
           <section>
             <h2 className="mb-4 text-xl font-bold text-gray-900">
-              Lista de Congregações
+              Lista de Membros
             </h2>
 
             {isLoading ? (
-              <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-                <p className="text-gray-600">Carregando congregações...</p>
-              </div>
-            ) : todasCongregacoes.length > 0 ? (
+              <p>Carregando...</p>
+            ) : membros.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                  {todasCongregacoes.map(congregacao => (
+                  {membros.map(membro => (
                     <EntityCard
-                      key={congregacao.id}
-                      id={congregacao.id}
-                      nome={congregacao.name}
-                      level="congregation"
+                      key={membro.id}
+                      id={membro.id}
+                      nome={membro.name}
+                      level="member"
+                      descricao={`${membro.congregation?.name ?? ""} • ${membro.address?.city ?? ""}`}
                     />
                   ))}
                 </div>
 
-                {/* Trigger do scroll infinito */}
-                {hasNextPage && (
-                  <div ref={loadMoreRef} className="py-10 text-center">
-                    {isFetchingNextPage
-                      ? "Carregando mais..."
-                      : "Role para carregar mais"}
-                  </div>
-                )}
+                <div ref={loadMoreRef} className="mt-6 text-center">
+                  {isFetchingNextPage && <p>Carregando mais...</p>}
+                </div>
               </>
             ) : (
               <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-                <p className="text-gray-600">
-                  Nenhuma congregação cadastrada ainda.
-                </p>
+                <p className="text-gray-600">Nenhum membro cadastrado ainda.</p>
               </div>
             )}
           </section>

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { ReactQueryProvider } from "@/shared/providers/reactQuery.provider";
 
 export const metadata: Metadata = {
   title: "CONFRADAC Dashboard",
@@ -19,7 +20,7 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body>
         <Toaster position="top-right" />
-        {children}
+        <ReactQueryProvider>{children}</ReactQueryProvider>
       </body>
     </html>
   );

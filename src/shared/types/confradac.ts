@@ -1,8 +1,3 @@
-/**
- * Tipos para a estrutura hierárquica da CONFRADAC
- * Federação > ENOADs > Regionais > Igrejas > Grupos
- */
-
 export interface Grupo {
   id: string;
   nome: string;
@@ -56,11 +51,13 @@ export interface Federacao {
   totalRegionais: number;
 }
 
-/**
- * Tipos para navegação e estado
- */
-
-export type HierarchyLevel = 'federacao' | 'enoads' | 'regional' | 'igreja' | 'grupo';
+export type HierarchyLevel =
+  | "federation"
+  | "enoads"
+  | "regional"
+  | "church"
+  | "congregation"
+  | "member";
 
 export interface BreadcrumbItem {
   label: string;

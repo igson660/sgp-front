@@ -48,6 +48,12 @@ const navItems = [
     icon: Users2,
     href: "/congregation",
   },
+  {
+    id: "member",
+    label: "Menbros",
+    icon: Users2,
+    href: "/member",
+  },
 ];
 
 export function Sidebar() {

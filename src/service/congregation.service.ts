@@ -7,22 +7,26 @@ import toast from "react-hot-toast";
 
 import { api } from "src/config/sgpCore";
 
-export const listCongregaçãochRequest = async ({
+export const listCongregationRequest = async ({
   search = "",
+  page = 1,
 }: {
-  search: string;
+  search?: string;
+  page?: number;
 }): Promise<ICongregationResponse> => {
   try {
     const query = new URLSearchParams();
+
     if (search) query.append("search", search);
+    query.append("page", String(page));
 
     return await api
-      .url(`congregations/?${query.toString()}&page/`)
+      .url(`congregations/?${query.toString()}`)
       .get()
       .json<ICongregationResponse>();
   } catch {
-    toast.error("Erro ao carregar Congregações.");
-    throw new Error("LIST_ENOAD_ERROR");
+    toast.error("Erro ao carregar congregação.");
+    throw new Error("LIST_CONGREGATION_ERROR");
   }
 };
 
