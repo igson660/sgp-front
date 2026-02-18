@@ -17,23 +17,23 @@ import {
 } from "@/shared/utils/formatData";
 
 import z from "zod";
-import { regionalSchema } from "@/shared/schemas/regional.schema";
+import { congregationSchema } from "@/shared/schemas/congregation.schema";
 import {
-  retrieveRegionalRequest,
-  updateRegionalRequest,
-} from "@/service/regional.service";
-import { listChurchRequest } from "@/service/churches.service";
+  retrieveCongregationRequest,
+  updateCongregationRequest,
+} from "@/service/congregation.service";
+import { listRegionalRequest } from "@/service/regional.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
-type FormData = z.infer<typeof regionalSchema>;
+type FormData = z.infer<typeof congregationSchema>;
 
-export default function UpdateRegionalPage() {
+export default function UpdateCongregationPage() {
   const router = useRouter();
   const params = useParams();
-  const regionalId = params.id as string;
+  const congregationId = params.id as string;
 
-  const [selectedchurch, setSelectedchurch] = useState<{
+  const [selectedregional, setSelectedregional] = useState<{
     label: string;
     value: string;
   } | null>(null);
@@ -50,15 +50,15 @@ export default function UpdateRegionalPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(regionalSchema),
+    resolver: zodResolver(congregationSchema),
   });
 
   const { handleCepChange, loading: loadingCep } =
     useCepAutoFill<FormData>(setValue);
 
   useEffect(() => {
-    const loadChurch = async () => {
-      const response = await retrieveRegionalRequest(regionalId);
+    const loadCongregation = async () => {
+      const response = await retrieveCongregationRequest(congregationId);
       const data = response.data;
 
       setValue("name", data.name);
@@ -67,7 +67,7 @@ export default function UpdateRegionalPage() {
       setValue("email", data.email);
       setValue("phone", data.phone);
       setValue("status", data.status);
-      setValue("church", data.church.id);
+      setValue("regional", data.regional.id);
 
       setValue("address.zip_code", data.address.zip_code);
       setValue("address.address", data.address.address);
@@ -77,16 +77,16 @@ export default function UpdateRegionalPage() {
       setValue("address.city", data.address.city);
       setValue("address.country", data.address.country);
 
-      setSelectedchurch({
-        label: data.church.name,
-        value: data.church.id,
+      setSelectedregional({
+        label: data.regional.name,
+        value: data.regional.id,
       });
 
       setLoadingData(false);
     };
 
-    loadChurch();
-  }, [regionalId, setValue]);
+    loadCongregation();
+  }, [congregationId, setValue]);
 
   const onSubmit = async (data: FormData) => {
     const payload = {
@@ -96,8 +96,8 @@ export default function UpdateRegionalPage() {
       cnpj: cleanCharacter(data.cnpj),
     };
 
-    await updateRegionalRequest(regionalId, payload);
-    router.push("/regionais");
+    await updateCongregationRequest(congregationId, payload);
+    router.push("/regionals");
   };
 
   const renderError = (fieldError?: { message?: string }) => (
@@ -112,7 +112,7 @@ export default function UpdateRegionalPage() {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="ml-64 flex-1">
-        <Header title="Editar Regional" />
+        <Header title="Editar Congregação" />
 
         <div className="p-8">
           <form
@@ -212,31 +212,31 @@ export default function UpdateRegionalPage() {
                 <div className="flex flex-col md:col-span-2">
                   <Controller
                     control={control}
-                    name="church"
+                    name="regional"
                     render={({ field }) => (
                       <>
                         <AsyncSelect
                           cacheOptions
                           defaultOptions
                           loadOptions={async (inputValue: string) => {
-                            const response = await listChurchRequest({
+                            const response = await listRegionalRequest({
                               search: inputValue,
                             });
-                            return response.data.results.map(church => ({
-                              label: church.name,
-                              value: church.id,
+                            return response.data.results.map(regional => ({
+                              label: regional.name,
+                              value: regional.id,
                             }));
                           }}
                           onChange={(option: any) => {
                             field.onChange(option?.value ?? "");
-                            setSelectedchurch(option ?? null);
+                            setSelectedregional(option ?? null);
                           }}
-                          value={selectedchurch}
+                          value={selectedregional}
                           placeholder="Selecione o ENOAD"
                           isClearable
                           classNamePrefix="react-select"
                         />
-                        {renderError(errors.church)}
+                        {renderError(errors.regional)}
                       </>
                     )}
                   />

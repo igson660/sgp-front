@@ -17,21 +17,21 @@ import {
 } from "@/shared/utils/formatData";
 
 import z from "zod";
-import { congregationSchema } from "@/shared/schemas/congregation.schema";
 import {
-  retrieveCongregationRequest,
-  updateCongregationRequest,
-} from "@/service/congregation.service";
-import { listRegionalchRequest } from "@/service/regional.service";
+  retrieveRegionalRequest,
+  updateRegionalRequest,
+} from "@/service/regional.service";
+import { regionalSchema } from "@/shared/schemas/regional.schema";
+import { listChurchRequest } from "@/service/churches.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
-type FormData = z.infer<typeof congregationSchema>;
+type FormData = z.infer<typeof regionalSchema>;
 
 export default function UpdateRegionalPage() {
   const router = useRouter();
   const params = useParams();
-  const congregationId = params.id as string;
+  const regionalId = params.id as string;
 
   const [selectedregional, setSelectedregional] = useState<{
     label: string;
@@ -50,15 +50,15 @@ export default function UpdateRegionalPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(congregationSchema),
+    resolver: zodResolver(regionalSchema),
   });
 
   const { handleCepChange, loading: loadingCep } =
     useCepAutoFill<FormData>(setValue);
 
   useEffect(() => {
-    const loadCongregaton = async () => {
-      const response = await retrieveCongregationRequest(congregationId);
+    const loadRegional = async () => {
+      const response = await retrieveRegionalRequest(regionalId);
       const data = response.data;
 
       setValue("name", data.name);
@@ -67,7 +67,7 @@ export default function UpdateRegionalPage() {
       setValue("email", data.email);
       setValue("phone", data.phone);
       setValue("status", data.status);
-      setValue("regional", data.regional.id);
+      setValue("church", data.church.id);
 
       setValue("address.zip_code", data.address.zip_code);
       setValue("address.address", data.address.address);
@@ -78,15 +78,15 @@ export default function UpdateRegionalPage() {
       setValue("address.country", data.address.country);
 
       setSelectedregional({
-        label: data.regional.name,
-        value: data.regional.id,
+        label: data.church.name,
+        value: data.church.id,
       });
 
       setLoadingData(false);
     };
 
-    loadCongregaton();
-  }, [congregationId, setValue]);
+    loadRegional();
+  }, [regionalId, setValue]);
 
   const onSubmit = async (data: FormData) => {
     const payload = {
@@ -96,8 +96,8 @@ export default function UpdateRegionalPage() {
       cnpj: cleanCharacter(data.cnpj),
     };
 
-    await updateCongregationRequest(congregationId, payload);
-    router.push("/regionais");
+    await updateRegionalRequest(regionalId, payload);
+    router.push("/regionals");
   };
 
   const renderError = (fieldError?: { message?: string }) => (
@@ -212,19 +212,19 @@ export default function UpdateRegionalPage() {
                 <div className="flex flex-col md:col-span-2">
                   <Controller
                     control={control}
-                    name="regional"
+                    name="church"
                     render={({ field }) => (
                       <>
                         <AsyncSelect
                           cacheOptions
                           defaultOptions
                           loadOptions={async (inputValue: string) => {
-                            const response = await listRegionalchRequest({
+                            const response = await listChurchRequest({
                               search: inputValue,
                             });
-                            return response.data.results.map(regional => ({
-                              label: regional.name,
-                              value: regional.id,
+                            return response.data.results.map(church => ({
+                              label: church.name,
+                              value: church.id,
                             }));
                           }}
                           onChange={(option: any) => {
@@ -236,7 +236,7 @@ export default function UpdateRegionalPage() {
                           isClearable
                           classNamePrefix="react-select"
                         />
-                        {renderError(errors.regional)}
+                        {renderError(errors.church)}
                       </>
                     )}
                   />

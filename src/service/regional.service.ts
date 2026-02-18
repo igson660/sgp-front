@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 
 import { api } from "src/config/sgpCore";
 
-export const listRegionalchRequest = async ({
+export const listRegionalRequest = async ({
   search = "",
 }: {
   search: string;
@@ -17,12 +17,12 @@ export const listRegionalchRequest = async ({
     if (search) query.append("search", search);
 
     return await api
-      .url(`enoads/?${query.toString()}&page/`)
+      .url(`regionals/?${query.toString()}&page/`)
       .get()
       .json<IRegionalResponse>();
   } catch {
-    toast.error("Erro ao carregar ENOADs.");
-    throw new Error("LIST_ENOAD_ERROR");
+    toast.error("Erro ao carregar Regionais.");
+    throw new Error("LIST_REGIONALS_ERROR");
   }
 };
 

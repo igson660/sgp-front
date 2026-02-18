@@ -231,20 +231,22 @@ export default function CreateRegionalPage() {
                   control={control}
                   name="address.zip_code"
                   render={({ field }) => (
-                    <IMaskInput
-                      {...field}
-                      mask="00000-000"
-                      placeholder="CEP"
-                      onAccept={value => {
-                        field.onChange(value);
-                        handleCepChange(value);
-                      }}
-                      className={`w-full rounded-lg border p-2 ${
-                        errors.address?.zip_code
-                          ? "border-red-500"
-                          : "border-gray-300"
-                      }`}
-                    />
+                    <div className="flex flex-col">
+                      <IMaskInput
+                        {...field}
+                        mask="00000-000"
+                        placeholder="CEP"
+                        onAccept={value => {
+                          field.onChange(value);
+                          handleCepChange(value);
+                        }}
+                        className={`w-full rounded-lg border p-2 ${
+                          errors.address?.zip_code
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      />
+                    </div>
                   )}
                 />
                 <div className="flex flex-col">

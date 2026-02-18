@@ -15,10 +15,10 @@ export interface ICongregationBase {
   readonly status: "active" | "inactive";
 }
 
-export interface ICongregationItem extends Omit<ICongregationBase, "church"> {
+export interface ICongregationItem extends Omit<ICongregationBase, "regional"> {
   readonly id: string;
   readonly address: IAddressResponseList | IAddressResponse;
-  readonly church: IRegionalResponseList;
+  readonly regional: IRegionalResponseList;
 }
 
 export interface ICongregationData {

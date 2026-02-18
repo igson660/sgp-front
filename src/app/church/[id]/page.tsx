@@ -56,7 +56,6 @@ export default function UpdateChurchPage() {
   const { handleCepChange, loading: loadingCep } =
     useCepAutoFill<FormData>(setValue);
 
-  // carregar church
   useEffect(() => {
     const loadChurch = async () => {
       const response = await retrieveChurchRequest(churchId);

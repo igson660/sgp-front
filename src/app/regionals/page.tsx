@@ -34,7 +34,7 @@ export default function RegionaisPage() {
         <div className="p-8">
           <div className="mb-6 flex justify-end">
             <Link
-              href="/regionais/create"
+              href="/regionals/create"
               className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
             >
               + Nova Regional

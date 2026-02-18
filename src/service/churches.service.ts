@@ -22,8 +22,8 @@ export const listChurchRequest = async ({
       .get()
       .json<IChurchResponse>();
   } catch {
-    toast.error("Erro ao carregar ENOADs.");
-    throw new Error("LIST_ENOAD_ERROR");
+    toast.error("Erro ao carregar Igreja.");
+    throw new Error("LIST_CHURCH_ERROR");
   }
 };
 

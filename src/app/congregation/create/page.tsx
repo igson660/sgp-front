@@ -14,7 +14,7 @@ import { cleanCharacter, formatDateToISO } from "@/shared/utils/formatData";
 import z from "zod";
 import { congregationSchema } from "@/shared/schemas/congregation.schema";
 import { createCongregationRequest } from "@/service/congregation.service";
-import { listRegionalchRequest } from "@/service/regional.service";
+import { listRegionalRequest } from "@/service/regional.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
@@ -196,7 +196,7 @@ export default function CreateCongregationPage() {
                           cacheOptions
                           defaultOptions
                           loadOptions={async (inputValue: string) => {
-                            const response = await listRegionalchRequest({
+                            const response = await listRegionalRequest({
                               search: inputValue,
                             });
                             return response.data.results.map(regional => ({
