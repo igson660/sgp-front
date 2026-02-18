@@ -25,7 +25,7 @@ const levelColors = {
   enoads: "border-purple-300 bg-purple-50",
   regional: "border-indigo-300 bg-indigo-50",
   igreja: "border-green-300 bg-green-50",
-  grupo: "border-orange-300 bg-orange-50",
+  congregacao: "border-orange-300 bg-orange-50",
 };
 
 const levelIcons = {
@@ -33,7 +33,7 @@ const levelIcons = {
   enoads: "📍",
   regional: "🗺️",
   igreja: "⛪",
-  grupo: "👥",
+  congregacao: "👥",
 };
 
 export function EntityCard({

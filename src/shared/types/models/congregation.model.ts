@@ -3,11 +3,11 @@ import {
   IAddressResponse,
   IAddressResponseList,
 } from "./address.model";
-import { IEnoadResponseList } from "./enoads.model";
+import { IRegionalResponseList } from "./regional.model";
 
-export interface IRegionalBase {
+export interface ICongregationBase {
   readonly name: string;
-  readonly church: string;
+  readonly regional: string;
   readonly cnpj: string;
   readonly foundation_date: string;
   readonly email: string;
@@ -15,35 +15,35 @@ export interface IRegionalBase {
   readonly status: "active" | "inactive";
 }
 
-export interface IRegionalItem extends Omit<IRegionalBase, "church"> {
+export interface ICongregationItem extends Omit<ICongregationBase, "church"> {
   readonly id: string;
   readonly address: IAddressResponseList | IAddressResponse;
-  readonly church: IEnoadResponseList;
+  readonly church: IRegionalResponseList;
 }
 
-export interface IRegionalData {
+export interface ICongregationData {
   readonly count: number;
   readonly next: string | null;
   readonly previous: string | null;
-  readonly results: IRegionalItem[];
+  readonly results: ICongregationItem[];
   readonly total_pages: number;
 }
 
-export interface IRegionalCreate extends IRegionalBase {
+export interface ICongregationCreate extends ICongregationBase {
   readonly address: IAddressCreate;
 }
 
-export interface IRegionalResponse {
+export interface ICongregationResponse {
   readonly status: "success";
-  readonly data: IRegionalData;
+  readonly data: ICongregationData;
 }
 
-export interface IRegionalResponseDetails {
+export interface ICongregationResponseDetails {
   readonly status: "success";
-  readonly data: IRegionalItem;
+  readonly data: ICongregationItem;
 }
 
-export interface IRegionalResponseList {
+export interface ICongregationResponseList {
   readonly id: string;
   readonly name: string;
 }

@@ -31,22 +31,22 @@ const navItems = [
     href: "/enoads",
   },
   {
-    id: "regionais",
-    label: "Regionais",
-    icon: Users,
-    href: "/regionais",
-  },
-  {
     id: "igrejas",
     label: "Igrejas",
     icon: Church,
     href: "/church",
   },
   {
-    id: "grupos",
-    label: "Grupos",
+    id: "regionais",
+    label: "Regionais",
+    icon: Users,
+    href: "/regionals",
+  },
+  {
+    id: "congregacao",
+    label: "Congregações",
     icon: Users2,
-    href: "/grupos",
+    href: "/congregation",
   },
 ];
 
