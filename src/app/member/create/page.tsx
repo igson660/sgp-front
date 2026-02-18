@@ -12,13 +12,13 @@ import { Header } from "@/components/dashboard/Header";
 import { useCepAutoFill } from "@/shared/hooks/useCep";
 import { cleanCharacter, formatDateToISO } from "@/shared/utils/formatData";
 import z from "zod";
-import { congregationSchema } from "@/shared/schemas/congregation.schema";
-import { createCongregationRequest } from "@/service/congregation.service";
-import { listRegionalRequest } from "@/service/regional.service";
+import { memberSchema } from "@/shared/schemas/member.schema copy";
+import { createPeopleRequest } from "@/service/people.service";
+import { listCongregationRequest } from "@/service/congregation.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
-type FormData = z.infer<typeof congregationSchema>;
+type FormData = z.infer<typeof memberSchema>;
 
 export default function CreateCongregationPage() {
   const router = useRouter();
@@ -37,15 +37,15 @@ export default function CreateCongregationPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(congregationSchema),
+    resolver: zodResolver(memberSchema),
     defaultValues: {
       name: "",
-      cnpj: "",
-      foundation_date: "",
+      cpf: "",
+      birth_date: "",
       email: "",
       phone: "",
       status: "active",
-      regional: "",
+      congregation: "",
       address: {
         zip_code: "",
         address: "",
@@ -64,13 +64,13 @@ export default function CreateCongregationPage() {
   const onSubmit = async (data: FormData) => {
     const payload = {
       ...data,
-      foundation_date: formatDateToISO(data.foundation_date),
+      birth_date: formatDateToISO(data.birth_date),
       phone: cleanCharacter(data.phone),
-      cnpj: cleanCharacter(data.cnpj),
+      cpf: cleanCharacter(data.cpf),
     };
     try {
-      await createCongregationRequest(payload);
-      router.push("/congregation");
+      await createPeopleRequest(payload);
+      router.push("/member");
     } catch (error) {
       console.error(error);
     }
@@ -86,7 +86,7 @@ export default function CreateCongregationPage() {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="ml-64 flex-1">
-        <Header title="Nova Congregação" />
+        <Header title="Nova Membro" />
 
         <div className="p-8">
           <form
@@ -107,16 +107,16 @@ export default function CreateCongregationPage() {
 
               <Controller
                 control={control}
-                name="cnpj"
+                name="cpf"
                 render={({ field }) => (
                   <div className="flex flex-col">
                     <IMaskInput
                       {...field}
-                      mask="00.000.000/0000-00"
+                      mask="000.000.000-00"
                       onAccept={field.onChange}
-                      placeholder="CNPJ"
+                      placeholder="cpf"
                       className={`w-full rounded-lg border p-2 ${
-                        errors.cnpj ? "border-red-500" : "border-gray-300"
+                        errors.cpf ? "border-red-500" : "border-gray-300"
                       }`}
                     />
                   </div>
@@ -125,18 +125,16 @@ export default function CreateCongregationPage() {
 
               <Controller
                 control={control}
-                name="foundation_date"
+                name="birth_date"
                 render={({ field }) => (
                   <div className="flex flex-col">
                     <IMaskInput
                       {...field}
                       mask="00/00/0000"
                       onAccept={field.onChange}
-                      placeholder="Data de fundação"
+                      placeholder="Data de nascimento"
                       className={`w-full rounded-lg border p-2 ${
-                        errors.foundation_date
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        errors.birth_date ? "border-red-500" : "border-gray-300"
                       }`}
                     />
                   </div>
@@ -189,19 +187,19 @@ export default function CreateCongregationPage() {
                 <div className="flex flex-col md:col-span-2">
                   <Controller
                     control={control}
-                    name="regional"
+                    name="congregation"
                     render={({ field }) => (
                       <>
                         <AsyncSelect
                           cacheOptions
                           defaultOptions
                           loadOptions={async (inputValue: string) => {
-                            const response = await listRegionalRequest({
+                            const response = await listCongregationRequest({
                               search: inputValue,
                             });
-                            return response.data.results.map(regional => ({
-                              label: regional.name,
-                              value: regional.id,
+                            return response.data.results.map(congregation => ({
+                              label: congregation.name,
+                              value: congregation.id,
                             }));
                           }}
                           onChange={(option: any) => {
@@ -213,12 +211,12 @@ export default function CreateCongregationPage() {
                           isClearable
                           classNamePrefix="react-select"
                           className={`w-full rounded-lg border ${
-                            errors.regional
+                            errors.congregation
                               ? "border-red-500"
                               : "border-gray-300"
                           }`}
                         />
-                        {renderError(errors.regional)}
+                        {renderError(errors.congregation)}
                       </>
                     )}
                   />
@@ -340,7 +338,7 @@ export default function CreateCongregationPage() {
               disabled={isSubmitting}
               className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? "Cadastrando..." : "Cadastrar Congregação"}
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Membro"}
             </button>
           </form>
         </div>

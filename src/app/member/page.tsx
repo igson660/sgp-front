@@ -2,6 +2,7 @@
 
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 import { Sidebar } from "@/components/dashboard/Sidebar";
@@ -10,6 +11,7 @@ import { EntityCard } from "@/components/dashboard/EntityCard";
 import { listPeopleRequest } from "@/service/people.service";
 
 export default function MembrosPage() {
+  const router = useRouter();
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
@@ -41,6 +43,10 @@ export default function MembrosPage() {
 
     return () => observer.disconnect();
   }, [fetchNextPage, hasNextPage]);
+
+  const handleViewMember = (id: string) => {
+    router.push(`/member/view/${id}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -76,6 +82,7 @@ export default function MembrosPage() {
                       nome={membro.name}
                       level="member"
                       descricao={`${membro.congregation?.name ?? ""} • ${membro.address?.city ?? ""}`}
+                      onClick={handleViewMember}
                     />
                   ))}
                 </div>

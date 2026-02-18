@@ -17,23 +17,23 @@ import {
 } from "@/shared/utils/formatData";
 
 import z from "zod";
-import { congregationSchema } from "@/shared/schemas/congregation.schema";
-import {
-  retrieveCongregationRequest,
-  updateCongregationRequest,
-} from "@/service/congregation.service";
 import { listRegionalRequest } from "@/service/regional.service";
+import { memberSchema } from "@/shared/schemas/member.schema copy";
+import {
+  retrievePeopleRequest,
+  updatePeopleRequest,
+} from "@/service/people.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
-type FormData = z.infer<typeof congregationSchema>;
+type FormData = z.infer<typeof memberSchema>;
 
 export default function UpdateCongregationPage() {
   const router = useRouter();
   const params = useParams();
-  const congregationId = params.id as string;
+  const peopleId = params.id as string;
 
-  const [selectedregional, setSelectedregional] = useState<{
+  const [selectedregional, setSelectedcongregation] = useState<{
     label: string;
     value: string;
   } | null>(null);
@@ -50,7 +50,7 @@ export default function UpdateCongregationPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(congregationSchema),
+    resolver: zodResolver(memberSchema),
   });
 
   const { handleCepChange, loading: loadingCep } =
@@ -58,16 +58,16 @@ export default function UpdateCongregationPage() {
 
   useEffect(() => {
     const loadCongregation = async () => {
-      const response = await retrieveCongregationRequest(congregationId);
+      const response = await retrievePeopleRequest(peopleId);
       const data = response.data;
 
       setValue("name", data.name);
-      setValue("cnpj", data.cnpj);
-      setValue("foundation_date", formatDateFromISO(data.foundation_date));
+      setValue("cpf", data.cpf);
+      setValue("birth_date", formatDateFromISO(data.birth_date));
       setValue("email", data.email);
       setValue("phone", data.phone);
       setValue("status", data.status);
-      setValue("regional", data.regional.id);
+      setValue("congregation", data.congregation.id);
 
       setValue("address.zip_code", data.address.zip_code);
       setValue("address.address", data.address.address);
@@ -77,27 +77,27 @@ export default function UpdateCongregationPage() {
       setValue("address.city", data.address.city);
       setValue("address.country", data.address.country);
 
-      setSelectedregional({
-        label: data.regional.name,
-        value: data.regional.id,
+      setSelectedcongregation({
+        label: data.congregation.name,
+        value: data.congregation.id,
       });
 
       setLoadingData(false);
     };
 
     loadCongregation();
-  }, [congregationId, setValue]);
+  }, [peopleId, setValue]);
 
   const onSubmit = async (data: FormData) => {
     const payload = {
       ...data,
-      foundation_date: formatDateToISO(data.foundation_date),
+      birth_date: formatDateToISO(data.birth_date),
       phone: cleanCharacter(data.phone),
-      cnpj: cleanCharacter(data.cnpj),
+      cnpj: cleanCharacter(data.cpf),
     };
 
-    await updateCongregationRequest(congregationId, payload);
-    router.push("/regionals");
+    await updatePeopleRequest(peopleId, payload);
+    router.push("/member");
   };
 
   const renderError = (fieldError?: { message?: string }) => (
@@ -112,7 +112,7 @@ export default function UpdateCongregationPage() {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="ml-64 flex-1">
-        <Header title="Editar Congregação" />
+        <Header title="Editar Membro" />
 
         <div className="p-8">
           <form
@@ -133,16 +133,16 @@ export default function UpdateCongregationPage() {
 
               <Controller
                 control={control}
-                name="cnpj"
+                name="cpf"
                 render={({ field }) => (
                   <div className="flex flex-col">
                     <IMaskInput
                       {...field}
-                      mask="00.000.000/0000-00"
+                      mask="000.000.000-00"
                       onAccept={field.onChange}
                       placeholder="CNPJ"
                       className={`w-full rounded-lg border p-2 ${
-                        errors.cnpj ? "border-red-500" : "border-gray-300"
+                        errors.cpf ? "border-red-500" : "border-gray-300"
                       }`}
                     />
                   </div>
@@ -151,18 +151,16 @@ export default function UpdateCongregationPage() {
 
               <Controller
                 control={control}
-                name="foundation_date"
+                name="birth_date"
                 render={({ field }) => (
                   <div className="flex flex-col">
                     <IMaskInput
                       {...field}
                       mask="00/00/0000"
                       onAccept={field.onChange}
-                      placeholder="Data de fundação"
+                      placeholder="Data de nascimento"
                       className={`w-full rounded-lg border p-2 ${
-                        errors.foundation_date
-                          ? "border-red-500"
-                          : "border-gray-300"
+                        errors.birth_date ? "border-red-500" : "border-gray-300"
                       }`}
                     />
                   </div>
@@ -212,7 +210,7 @@ export default function UpdateCongregationPage() {
                 <div className="flex flex-col md:col-span-2">
                   <Controller
                     control={control}
-                    name="regional"
+                    name="congregation"
                     render={({ field }) => (
                       <>
                         <AsyncSelect
@@ -229,14 +227,14 @@ export default function UpdateCongregationPage() {
                           }}
                           onChange={(option: any) => {
                             field.onChange(option?.value ?? "");
-                            setSelectedregional(option ?? null);
+                            setSelectedcongregation(option ?? null);
                           }}
                           value={selectedregional}
                           placeholder="Selecione o ENOAD"
                           isClearable
                           classNamePrefix="react-select"
                         />
-                        {renderError(errors.regional)}
+                        {renderError(errors.congregation)}
                       </>
                     )}
                   />
