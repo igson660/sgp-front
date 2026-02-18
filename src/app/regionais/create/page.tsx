@@ -3,43 +3,30 @@
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { IMaskInput } from "react-imask";
 import dynamic from "next/dynamic";
 
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { useCepAutoFill } from "@/shared/hooks/useCep";
-import {
-  cleanCharacter,
-  formatDateToISO,
-  formatDateFromISO,
-} from "@/shared/utils/formatData";
-import { churchSchema } from "@/shared/schemas/church.schema";
-import {
-  updateChurchRequest,
-  retrieveChurchRequest,
-} from "@/service/churches.service";
-import { listEnoadRequest } from "@/service/enoads.service";
-
+import { cleanCharacter, formatDateToISO } from "@/shared/utils/formatData";
 import z from "zod";
+import { regionalSchema } from "@/shared/schemas/regional.schema";
+import { createRegionalRequest } from "@/service/regional.service";
+import { listChurchRequest } from "@/service/churches.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
-type FormData = z.infer<typeof churchSchema>;
+type FormData = z.infer<typeof regionalSchema>;
 
-export default function UpdateChurchPage() {
+export default function CreateChurchPage() {
   const router = useRouter();
-  const params = useParams();
-  const churchId = params.id as string;
-
-  const [selectedEnoad, setSelectedEnoad] = useState<{
+  const [selectedchurch, setSelectedchurch] = useState<{
     label: string;
     value: string;
   } | null>(null);
-
   const [isMounted, setIsMounted] = useState(false);
-  const [loadingData, setLoadingData] = useState(true);
 
   useEffect(() => setIsMounted(true), []);
 
@@ -50,44 +37,29 @@ export default function UpdateChurchPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(churchSchema),
+    resolver: zodResolver(regionalSchema),
+    defaultValues: {
+      name: "",
+      cnpj: "",
+      foundation_date: "",
+      email: "",
+      phone: "",
+      status: "active",
+      church: "",
+      address: {
+        zip_code: "",
+        address: "",
+        address_number: "",
+        address_complement: "",
+        state: "",
+        city: "",
+        country: "",
+      },
+    },
   });
 
   const { handleCepChange, loading: loadingCep } =
     useCepAutoFill<FormData>(setValue);
-
-  // carregar church
-  useEffect(() => {
-    const loadChurch = async () => {
-      const response = await retrieveChurchRequest(churchId);
-      const data = response.data;
-
-      setValue("name", data.name);
-      setValue("cnpj", data.cnpj);
-      setValue("foundation_date", formatDateFromISO(data.foundation_date));
-      setValue("email", data.email);
-      setValue("phone", data.phone);
-      setValue("status", data.status);
-      setValue("enoad", data.enoad.id);
-
-      setValue("address.zip_code", data.address.zip_code);
-      setValue("address.address", data.address.address);
-      setValue("address.address_number", data.address.address_number);
-      setValue("address.address_complement", data.address.address_complement);
-      setValue("address.state", data.address.state);
-      setValue("address.city", data.address.city);
-      setValue("address.country", data.address.country);
-
-      setSelectedEnoad({
-        label: data.enoad.name,
-        value: data.enoad.id,
-      });
-
-      setLoadingData(false);
-    };
-
-    loadChurch();
-  }, [churchId, setValue]);
 
   const onSubmit = async (data: FormData) => {
     const payload = {
@@ -96,24 +68,25 @@ export default function UpdateChurchPage() {
       phone: cleanCharacter(data.phone),
       cnpj: cleanCharacter(data.cnpj),
     };
-
-    await updateChurchRequest(churchId, payload);
-    router.push("/church");
+    try {
+      await createRegionalRequest(payload);
+      router.push("/regionais");
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const renderError = (fieldError?: { message?: string }) => (
     <p className="mt-1 min-h-[1.25rem] text-sm text-red-500">
-      {fieldError?.message || " "}
+      {fieldError?.message || " "}
     </p>
   );
-
-  if (loadingData) return null;
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="ml-64 flex-1">
-        <Header title="Editar Igreja" />
+        <Header title="Nova Regional" />
 
         <div className="p-8">
           <form
@@ -124,7 +97,7 @@ export default function UpdateChurchPage() {
               <div className="flex flex-col">
                 <input
                   {...register("name")}
-                  placeholder="Nome da Igreja"
+                  placeholder="Nome da Regional"
                   className={`w-full rounded-lg border p-2 ${
                     errors.name ? "border-red-500" : "border-gray-300"
                   }`}
@@ -202,42 +175,48 @@ export default function UpdateChurchPage() {
               <div className="flex flex-col">
                 <select
                   {...register("status")}
-                  className="w-full rounded-lg border border-gray-300 p-2"
+                  className={`w-full rounded-lg border p-2 ${
+                    errors.status ? "border-red-500" : "border-gray-300"
+                  }`}
                 >
                   <option value="active">Ativo</option>
                   <option value="inactive">Inativo</option>
                 </select>
+                {renderError(errors.status)}
               </div>
 
               {isMounted && (
                 <div className="flex flex-col md:col-span-2">
                   <Controller
                     control={control}
-                    name="enoad"
+                    name="church"
                     render={({ field }) => (
                       <>
                         <AsyncSelect
                           cacheOptions
                           defaultOptions
                           loadOptions={async (inputValue: string) => {
-                            const response = await listEnoadRequest({
+                            const response = await listChurchRequest({
                               search: inputValue,
                             });
-                            return response.data.results.map(enoad => ({
-                              label: enoad.name,
-                              value: enoad.id,
+                            return response.data.results.map(church => ({
+                              label: church.name,
+                              value: church.id,
                             }));
                           }}
                           onChange={(option: any) => {
                             field.onChange(option?.value ?? "");
-                            setSelectedEnoad(option ?? null);
+                            setSelectedchurch(option ?? null);
                           }}
-                          value={selectedEnoad}
-                          placeholder="Selecione o ENOAD"
+                          value={selectedchurch}
+                          placeholder="Selecione a Igreja"
                           isClearable
                           classNamePrefix="react-select"
+                          className={`w-full rounded-lg border ${
+                            errors.church ? "border-red-500" : "border-gray-300"
+                          }`}
                         />
-                        {renderError(errors.enoad)}
+                        {renderError(errors.church)}
                       </>
                     )}
                   />
@@ -245,27 +224,27 @@ export default function UpdateChurchPage() {
               )}
             </div>
 
-            {/* endereço */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Endereço</h2>
-
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <Controller
                   control={control}
                   name="address.zip_code"
                   render={({ field }) => (
-                    <div className="flex flex-col">
-                      <IMaskInput
-                        {...field}
-                        mask="00000-000"
-                        onAccept={value => {
-                          field.onChange(value);
-                          handleCepChange(value);
-                        }}
-                        placeholder="CEP"
-                        className="w-full rounded-lg border border-gray-300 p-2"
-                      />
-                    </div>
+                    <IMaskInput
+                      {...field}
+                      mask="00000-000"
+                      placeholder="CEP"
+                      onAccept={value => {
+                        field.onChange(value);
+                        handleCepChange(value);
+                      }}
+                      className={`w-full rounded-lg border p-2 ${
+                        errors.address?.zip_code
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
                   )}
                 />
                 <div className="flex flex-col">
@@ -273,46 +252,81 @@ export default function UpdateChurchPage() {
                     {...register("address.address")}
                     placeholder="Rua"
                     disabled={loadingCep}
-                    className="w-full rounded-lg border border-gray-300 p-2"
+                    className={`w-full rounded-lg border p-2 ${
+                      errors.address?.address
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
+                  {renderError(errors.address?.address)}
                 </div>
+
                 <div className="flex flex-col">
                   <input
                     {...register("address.address_number")}
                     placeholder="Número"
-                    className="w-full rounded-lg border border-gray-300 p-2"
+                    className={`w-full rounded-lg border p-2 ${
+                      errors.address?.address_number
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
+                  {renderError(errors.address?.address_number)}
                 </div>
+
                 <div className="flex flex-col">
                   <input
                     {...register("address.address_complement")}
                     placeholder="Complemento"
-                    className="w-full rounded-lg border border-gray-300 p-2"
+                    className={`w-full rounded-lg border p-2 ${
+                      errors.address?.address_complement
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
+                  {renderError(errors.address?.address_complement)}
                 </div>
+
                 <div className="flex flex-col">
                   <input
                     {...register("address.state")}
                     placeholder="Estado"
                     disabled={loadingCep}
-                    className="w-full rounded-lg border border-gray-300 p-2"
+                    className={`w-full rounded-lg border p-2 ${
+                      errors.address?.state
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
+                  {renderError(errors.address?.state)}
                 </div>
+
                 <div className="flex flex-col">
                   <input
                     {...register("address.city")}
                     placeholder="Cidade"
                     disabled={loadingCep}
-                    className="w-full rounded-lg border border-gray-300 p-2"
+                    className={`w-full rounded-lg border p-2 ${
+                      errors.address?.city
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
+                  {renderError(errors.address?.city)}
                 </div>
-                <div className="flex flex-col">
+
+                <div className="flex flex-col md:col-span-2">
                   <input
                     {...register("address.country")}
                     placeholder="País"
                     disabled={loadingCep}
-                    className="w-full rounded-lg border border-gray-300 p-2 md:col-span-2"
+                    className={`w-full rounded-lg border p-2 ${
+                      errors.address?.country
+                        ? "border-red-500"
+                        : "border-gray-300"
+                    }`}
                   />
+                  {renderError(errors.address?.country)}
                 </div>
               </div>
             </div>
@@ -322,7 +336,7 @@ export default function UpdateChurchPage() {
               disabled={isSubmitting}
               className="w-full rounded-xl bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
             >
-              {isSubmitting ? "Salvando..." : "Salvar Alterações"}
+              {isSubmitting ? "Cadastrando..." : "Cadastrar Regional"}
             </button>
           </form>
         </div>

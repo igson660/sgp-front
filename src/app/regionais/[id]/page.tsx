@@ -15,25 +15,25 @@ import {
   formatDateToISO,
   formatDateFromISO,
 } from "@/shared/utils/formatData";
-import { churchSchema } from "@/shared/schemas/church.schema";
-import {
-  updateChurchRequest,
-  retrieveChurchRequest,
-} from "@/service/churches.service";
-import { listEnoadRequest } from "@/service/enoads.service";
 
 import z from "zod";
+import { regionalSchema } from "@/shared/schemas/regional.schema";
+import {
+  retrieveRegionalRequest,
+  updateRegionalRequest,
+} from "@/service/regional.service";
+import { listChurchRequest } from "@/service/churches.service";
 
 const AsyncSelect = dynamic(() => import("react-select/async"), { ssr: false });
 
-type FormData = z.infer<typeof churchSchema>;
+type FormData = z.infer<typeof regionalSchema>;
 
 export default function UpdateChurchPage() {
   const router = useRouter();
   const params = useParams();
-  const churchId = params.id as string;
+  const regionalId = params.id as string;
 
-  const [selectedEnoad, setSelectedEnoad] = useState<{
+  const [selectedchurch, setSelectedchurch] = useState<{
     label: string;
     value: string;
   } | null>(null);
@@ -50,16 +50,15 @@ export default function UpdateChurchPage() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
-    resolver: zodResolver(churchSchema),
+    resolver: zodResolver(regionalSchema),
   });
 
   const { handleCepChange, loading: loadingCep } =
     useCepAutoFill<FormData>(setValue);
 
-  // carregar church
   useEffect(() => {
     const loadChurch = async () => {
-      const response = await retrieveChurchRequest(churchId);
+      const response = await retrieveRegionalRequest(regionalId);
       const data = response.data;
 
       setValue("name", data.name);
@@ -68,7 +67,7 @@ export default function UpdateChurchPage() {
       setValue("email", data.email);
       setValue("phone", data.phone);
       setValue("status", data.status);
-      setValue("enoad", data.enoad.id);
+      setValue("church", data.church.id);
 
       setValue("address.zip_code", data.address.zip_code);
       setValue("address.address", data.address.address);
@@ -78,16 +77,16 @@ export default function UpdateChurchPage() {
       setValue("address.city", data.address.city);
       setValue("address.country", data.address.country);
 
-      setSelectedEnoad({
-        label: data.enoad.name,
-        value: data.enoad.id,
+      setSelectedchurch({
+        label: data.church.name,
+        value: data.church.id,
       });
 
       setLoadingData(false);
     };
 
     loadChurch();
-  }, [churchId, setValue]);
+  }, [regionalId, setValue]);
 
   const onSubmit = async (data: FormData) => {
     const payload = {
@@ -97,8 +96,8 @@ export default function UpdateChurchPage() {
       cnpj: cleanCharacter(data.cnpj),
     };
 
-    await updateChurchRequest(churchId, payload);
-    router.push("/church");
+    await updateRegionalRequest(regionalId, payload);
+    router.push("/regionais");
   };
 
   const renderError = (fieldError?: { message?: string }) => (
@@ -113,7 +112,7 @@ export default function UpdateChurchPage() {
     <div className="flex min-h-screen bg-gray-50">
       <Sidebar />
       <main className="ml-64 flex-1">
-        <Header title="Editar Igreja" />
+        <Header title="Editar Regional" />
 
         <div className="p-8">
           <form
@@ -213,31 +212,31 @@ export default function UpdateChurchPage() {
                 <div className="flex flex-col md:col-span-2">
                   <Controller
                     control={control}
-                    name="enoad"
+                    name="church"
                     render={({ field }) => (
                       <>
                         <AsyncSelect
                           cacheOptions
                           defaultOptions
                           loadOptions={async (inputValue: string) => {
-                            const response = await listEnoadRequest({
+                            const response = await listChurchRequest({
                               search: inputValue,
                             });
-                            return response.data.results.map(enoad => ({
-                              label: enoad.name,
-                              value: enoad.id,
+                            return response.data.results.map(church => ({
+                              label: church.name,
+                              value: church.id,
                             }));
                           }}
                           onChange={(option: any) => {
                             field.onChange(option?.value ?? "");
-                            setSelectedEnoad(option ?? null);
+                            setSelectedchurch(option ?? null);
                           }}
-                          value={selectedEnoad}
+                          value={selectedchurch}
                           placeholder="Selecione o ENOAD"
                           isClearable
                           classNamePrefix="react-select"
                         />
-                        {renderError(errors.enoad)}
+                        {renderError(errors.church)}
                       </>
                     )}
                   />
@@ -245,7 +244,6 @@ export default function UpdateChurchPage() {
               )}
             </div>
 
-            {/* endereço */}
             <div className="space-y-4">
               <h2 className="text-lg font-semibold">Endereço</h2>
 

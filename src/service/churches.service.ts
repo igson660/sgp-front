@@ -3,19 +3,27 @@ import {
   IChurchResponse,
   IChurchResponseDetails,
 } from "@/shared/types/models/church.model";
-import { IPaginated } from "@/shared/types/models/global.model";
+
 import toast from "react-hot-toast";
 
 import { api } from "src/config/sgpCore";
 
-export const listChurchRequest = async (): Promise<
-  IPaginated<IChurchResponse>
-> => {
+export const listChurchRequest = async ({
+  search = "",
+}: {
+  search: string;
+}): Promise<IChurchResponse> => {
   try {
-    return await api.url("churches/").get().json<IPaginated<IChurchResponse>>();
+    const query = new URLSearchParams();
+    if (search) query.append("search", search);
+
+    return await api
+      .url(`churches/?${query.toString()}&page/`)
+      .get()
+      .json<IChurchResponse>();
   } catch {
-    toast.error("Erro ao carregar Igrejas.");
-    throw new Error("LIST_Church_ERROR");
+    toast.error("Erro ao carregar ENOADs.");
+    throw new Error("LIST_ENOAD_ERROR");
   }
 };
 
