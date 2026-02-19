@@ -10,20 +10,24 @@ import { api } from "src/config/sgpCore";
 
 export const listChurchRequest = async ({
   search = "",
+  page = 1,
 }: {
-  search: string;
+  search?: string;
+  page?: number;
 }): Promise<IChurchResponse> => {
   try {
     const query = new URLSearchParams();
+
     if (search) query.append("search", search);
+    query.append("page", String(page));
 
     return await api
-      .url(`churches/?${query.toString()}&page/`)
+      .url(`churches/?${query.toString()}`)
       .get()
       .json<IChurchResponse>();
   } catch {
-    toast.error("Erro ao carregar Igreja.");
-    throw new Error("LIST_CHURCH_ERROR");
+    toast.error("Erro ao carregar congregação.");
+    throw new Error("LIST_CONGREGATION_ERROR");
   }
 };
 

@@ -1,28 +1,52 @@
+"use client";
+
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { EntityCard } from "@/components/dashboard/EntityCard";
-import { federacaoData } from "@/lib/mock-data";
-import Link from "next/link";
+import { listRegionalRequest } from "@/service/regional.service";
 
 export default function RegionaisPage() {
-  const federacao = federacaoData;
+  const router = useRouter();
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const todasRegionais = federacao.enoads.flatMap(enoad =>
-    enoad.regionais.map(regional => ({
-      ...regional,
-      enoadPai: enoad.nome,
-    }))
-  );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["regionals"],
+      queryFn: ({ pageParam = 1 }) => listRegionalRequest({ page: pageParam }),
+      getNextPageParam: lastPage => {
+        const next = lastPage.data.next;
+        if (!next) return undefined;
 
-  const totalIgrejas = todasRegionais.reduce(
-    (sum, regional) => sum + regional.igrejas.length,
-    0
-  );
+        const url = new URL(next);
+        return Number(url.searchParams.get("page"));
+      },
+      initialPageParam: 1,
+    });
 
-  const totalMembros = todasRegionais.reduce(
-    (sum, regional) => sum + regional.totalMembros,
-    0
-  );
+  const regionais = data?.pages.flatMap(page => page.data.results) ?? [];
+
+  useEffect(() => {
+    if (!loadMoreRef.current) return;
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasNextPage) {
+        fetchNextPage();
+      }
+    });
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage]);
+
+  const handleViewRegional = (id: string) => {
+    router.push(`/regionals/view/${id}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -34,40 +58,11 @@ export default function RegionaisPage() {
         <div className="p-8">
           <div className="mb-6 flex justify-end">
             <Link
-              href="/regionals/create"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
+              href="/regional/create"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
             >
               + Nova Regional
             </Link>
-          </div>
-
-          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-sm font-medium text-gray-600">
-                Total de Regionais
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
-                {todasRegionais.length}
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-sm font-medium text-gray-600">
-                Total de Igrejas
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
-                {totalIgrejas}
-              </p>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-sm font-medium text-gray-600">
-                Total de Membros
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
-                {totalMembros.toLocaleString("pt-BR")}
-              </p>
-            </div>
           </div>
 
           <section>
@@ -75,19 +70,36 @@ export default function RegionaisPage() {
               Lista de Regionais
             </h2>
 
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              {todasRegionais.map(regional => (
-                <EntityCard
-                  key={regional.id}
-                  id={regional.id}
-                  nome={regional.nome}
-                  level="regional"
-                  membros={regional.totalMembros}
-                  lider={regional.coordenador}
-                  descricao={`${regional.igrejas.length} igrejas • ${regional.totalGrupos} grupos • ${regional.enoadPai}`}
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <p>Carregando...</p>
+            ) : regionais.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {regionais.map(regional => (
+                    <EntityCard
+                      key={regional.id}
+                      id={regional.id}
+                      nome={regional.name}
+                      level="regional"
+                      descricao={`${regional.church?.name ?? ""} • ${
+                        regional.address?.city ?? ""
+                      }`}
+                      onClick={handleViewRegional}
+                    />
+                  ))}
+                </div>
+
+                <div ref={loadMoreRef} className="mt-6 text-center">
+                  {isFetchingNextPage && <p>Carregando mais...</p>}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+                <p className="text-gray-600">
+                  Nenhuma regional cadastrada ainda.
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </main>

@@ -9,20 +9,24 @@ import { api } from "src/config/sgpCore";
 
 export const listRegionalRequest = async ({
   search = "",
+  page = 1,
 }: {
-  search: string;
+  search?: string;
+  page?: number;
 }): Promise<IRegionalResponse> => {
   try {
     const query = new URLSearchParams();
+
     if (search) query.append("search", search);
+    query.append("page", String(page));
 
     return await api
-      .url(`regionals/?${query.toString()}&page/`)
+      .url(`regionals/?${query.toString()}`)
       .get()
       .json<IRegionalResponse>();
   } catch {
-    toast.error("Erro ao carregar Regionais.");
-    throw new Error("LIST_REGIONALS_ERROR");
+    toast.error("Erro ao carregar congregação.");
+    throw new Error("LIST_CONGREGATION_ERROR");
   }
 };
 

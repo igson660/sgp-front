@@ -1,24 +1,52 @@
+"use client";
+
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
+
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
 import { EntityCard } from "@/components/dashboard/EntityCard";
-import { federacaoData } from "@/lib/mock-data";
+import { listChurchRequest } from "@/service/churches.service";
 
 export default function ChurchPage() {
-  const federacao = federacaoData;
+  const router = useRouter();
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const todasIgrejas = federacao.enoads.flatMap(enoads =>
-    enoads.regionais.flatMap(regional =>
-      regional.igrejas.map(igreja => ({
-        ...igreja,
-        regionalPai: regional.nome,
-        enoadsPai: enoads.nome,
-      }))
-    )
-  );
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteQuery({
+      queryKey: ["churches"],
+      queryFn: ({ pageParam = 1 }) => listChurchRequest({ page: pageParam }),
+      getNextPageParam: lastPage => {
+        const next = lastPage?.data?.next;
+        if (!next) return undefined;
 
-  const igrejasAtivas = todasIgrejas.filter(i => i.ativa).length;
-  const igrejasInativas = todasIgrejas.length - igrejasAtivas;
+        const url = new URL(next);
+        return Number(url.searchParams.get("page"));
+      },
+      initialPageParam: 1,
+    });
+
+  const igrejas = data?.pages.flatMap(page => page.data.results) ?? [];
+
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasNextPage) return;
+
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        fetchNextPage();
+      }
+    });
+
+    observer.observe(loadMoreRef.current);
+
+    return () => observer.disconnect();
+  }, [fetchNextPage, hasNextPage]);
+
+  const handleViewChurch = (id: string) => {
+    router.push(`/church/view/${id}`);
+  };
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -28,72 +56,51 @@ export default function ChurchPage() {
         <Header title="Igrejas" />
 
         <div className="p-8">
-          <div className="mb-6 flex items-center justify-between">
-            <div />
+          <div className="mb-6 flex justify-end">
             <Link
               href="/church/create"
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
             >
               + Nova Igreja
             </Link>
-          </div>
-
-          <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-sm font-medium text-gray-600">
-                Total de Igrejas
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
-                {todasIgrejas.length}
-              </p>
-            </div>
-            <div className="rounded-lg border border-green-200 bg-green-50 p-4">
-              <p className="text-sm font-medium text-green-600">
-                Igrejas Ativas
-              </p>
-              <p className="mt-2 text-3xl font-bold text-green-900">
-                {igrejasAtivas}
-              </p>
-            </div>
-            <div className="rounded-lg border border-orange-200 bg-orange-50 p-4">
-              <p className="text-sm font-medium text-orange-600">
-                Igrejas Inativas
-              </p>
-              <p className="mt-2 text-3xl font-bold text-orange-900">
-                {igrejasInativas}
-              </p>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-4">
-              <p className="text-sm font-medium text-gray-600">
-                Total de Membros
-              </p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">
-                {todasIgrejas
-                  .reduce((sum, i) => sum + i.membros, 0)
-                  .toLocaleString("pt-BR")}
-              </p>
-            </div>
           </div>
 
           <section>
             <h2 className="mb-4 text-xl font-bold text-gray-900">
               Lista de Igrejas
             </h2>
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {todasIgrejas.map(igreja => (
-                <EntityCard
-                  key={igreja.id}
-                  id={igreja.id}
-                  nome={igreja.nome}
-                  level="igreja"
-                  membros={igreja.membros}
-                  localidade={igreja.localidade}
-                  lider={igreja.pastor}
-                  descricao={`${igreja.grupos.length} grupos`}
-                  ativa={igreja.ativa}
-                />
-              ))}
-            </div>
+
+            {isLoading ? (
+              <p>Carregando...</p>
+            ) : igrejas.length > 0 ? (
+              <>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {igrejas.map(igreja => (
+                    <EntityCard
+                      key={igreja.id}
+                      id={igreja.id}
+                      nome={igreja.name}
+                      level="church"
+                      descricao={`${igreja.enoad?.name ?? ""} • ${
+                        igreja.address?.city ?? ""
+                      }`}
+                      ativa={igreja.status === "active"}
+                      onClick={handleViewChurch}
+                    />
+                  ))}
+                </div>
+
+                <div ref={loadMoreRef} className="mt-6 text-center">
+                  {isFetchingNextPage && <p>Carregando mais...</p>}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+                <p className="text-gray-600">
+                  Nenhuma igreja cadastrada ainda.
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </main>

@@ -9,20 +9,24 @@ import { api } from "src/config/sgpCore";
 
 export const listEnoadRequest = async ({
   search = "",
+  page = 1,
 }: {
-  search: string;
+  search?: string;
+  page?: number;
 }): Promise<IEnoadResponse> => {
   try {
     const query = new URLSearchParams();
+
     if (search) query.append("search", search);
+    query.append("page", String(page));
 
     return await api
-      .url(`enoads/?${query.toString()}&page/`)
+      .url(`enoads/?${query.toString()}`)
       .get()
       .json<IEnoadResponse>();
   } catch {
-    toast.error("Erro ao carregar ENOADs.");
-    throw new Error("LIST_ENOAD_ERROR");
+    toast.error("Erro ao carregar congregação.");
+    throw new Error("LIST_CONGREGATION_ERROR");
   }
 };
 
