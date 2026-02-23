@@ -1,6 +1,6 @@
 import {
   IAddressCreate,
-  IAddressResponse,
+  IAddressItem,
   IAddressResponseList,
 } from "./address.model";
 import { IEnoadResponseList } from "./enoads.model";
@@ -17,7 +17,7 @@ export interface IRegionalBase {
 
 export interface IRegionalItem extends Omit<IRegionalBase, "church"> {
   readonly id: string;
-  readonly address: IAddressResponseList | IAddressResponse;
+  readonly address: IAddressResponseList | IAddressItem;
   readonly church: IEnoadResponseList;
 }
 

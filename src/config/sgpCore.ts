@@ -1,14 +1,17 @@
 "use client";
 
-import { parseCookies } from "nookies";
+// import { parseCookies } from "nookies";
 import wretch, { WretchOptions, WretchResponse } from "wretch";
 import AbortAddon from "wretch/addons/abort";
 
 import { IWretchMiddlewareOptions } from "src/shared/types/models/wretchMiddleware.model";
 
-import { DEV_API_URL, SESSION_COOKIE_KEY } from "./constants";
+import {
+  DEV_API_URL,
+  // SESSION_COOKIE_KEY
+} from "./constants";
 
-const notAuthNeededEndpoints = [`${DEV_API_URL}/login/`];
+// const notAuthNeededEndpoints = [`${DEV_API_URL}/login/`];
 
 const wretchMiddleware =
   () =>

@@ -1,6 +1,6 @@
 import {
   IAddressCreate,
-  IAddressResponse,
+  IAddressItem,
   IAddressResponseList,
 } from "./address.model";
 import { ICongregationResponseList } from "./congregation.model";
@@ -17,7 +17,7 @@ export interface IPeopleBase {
 
 export interface IPeopleItem extends Omit<IPeopleBase, "congregation"> {
   readonly id: string;
-  readonly address: IAddressResponseList | IAddressResponse;
+  readonly address: IAddressResponseList | IAddressItem;
   readonly congregation: ICongregationResponseList;
 }
 

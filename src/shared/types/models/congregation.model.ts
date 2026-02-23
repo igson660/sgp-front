@@ -1,6 +1,6 @@
 import {
   IAddressCreate,
-  IAddressResponse,
+  IAddressItem,
   IAddressResponseList,
 } from "./address.model";
 import { IRegionalResponseList } from "./regional.model";
@@ -17,7 +17,7 @@ export interface ICongregationBase {
 
 export interface ICongregationItem extends Omit<ICongregationBase, "regional"> {
   readonly id: string;
-  readonly address: IAddressResponseList | IAddressResponse;
+  readonly address: IAddressResponseList | IAddressItem;
   readonly regional: IRegionalResponseList;
 }
 

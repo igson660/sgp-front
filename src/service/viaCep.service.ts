@@ -1,11 +1,11 @@
 import { api } from "@/config/sgpCore";
-import { IAddressResponse } from "@/shared/types/models/address.model";
+import { IAddressResponseViacep } from "@/shared/types/models/address.model";
 import toast from "react-hot-toast";
 
 export const viaCepRequest = async (
   cep: string,
   signal?: AbortSignal
-): Promise<IAddressResponse | null> => {
+): Promise<IAddressResponseViacep | null> => {
   if (cep.length !== 8) return null;
 
   try {
@@ -13,7 +13,7 @@ export const viaCepRequest = async (
       .url(`viacep/${cep}/`)
       .options({ signal })
       .get()
-      .json<IAddressResponse>();
+      .json<IAddressResponseViacep>();
   } catch {
     toast.error("Erro ao carregar o endereço.");
     return null;

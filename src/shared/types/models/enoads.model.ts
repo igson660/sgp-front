@@ -1,6 +1,6 @@
 import {
   IAddressCreate,
-  IAddressResponse,
+  IAddressItem,
   IAddressResponseList,
 } from "./address.model";
 
@@ -15,7 +15,7 @@ export interface IEnoadBase {
 
 export interface IEnoadItem extends IEnoadBase {
   readonly id: string;
-  readonly address: IAddressResponseList | IAddressResponse;
+  readonly address: IAddressResponseList | IAddressItem;
 }
 
 export interface IEnoadData {

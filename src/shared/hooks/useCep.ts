@@ -1,7 +1,7 @@
 import { useRef, useState } from "react";
 import { FieldValues, Path, PathValue, UseFormSetValue } from "react-hook-form";
 import { viaCepRequest } from "@/service/viaCep.service";
-import { IAddressResponse } from "@/shared/types/models/address.model";
+import { IAddressResponseViacep } from "@/shared/types/models/address.model";
 
 export function useCepAutoFill<T extends FieldValues>(
   setValue: UseFormSetValue<T>
@@ -10,14 +10,16 @@ export function useCepAutoFill<T extends FieldValues>(
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
-  const cacheRef = useRef<Map<string, IAddressResponse>>(new Map());
+  const cacheRef = useRef<Map<string, IAddressResponseViacep>>(new Map());
 
   const setField = <K extends Path<T>>(field: K, value: PathValue<T, K>) => {
     setValue(field, value);
   };
 
-  const fillAddress = (response: IAddressResponse) => {
+  const fillAddress = (response: IAddressResponseViacep) => {
     if (response.status !== "success") return;
+
+    console.log(response);
 
     setField(
       "address.address" as Path<T>,

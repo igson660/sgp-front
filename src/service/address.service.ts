@@ -1,4 +1,3 @@
-import { IPaginated } from "@/shared/types/models/global.model";
 import toast from "react-hot-toast";
 
 import { api } from "src/config/sgpCore";
@@ -7,14 +6,9 @@ import {
   IAddressResponse,
 } from "src/shared/types/models/address.model";
 
-export const listAddressRequest = async (): Promise<
-  IPaginated<IAddressResponse>
-> => {
+export const listAddressRequest = async (): Promise<IAddressResponse> => {
   try {
-    return await api
-      .url("/addresses/")
-      .get()
-      .json<IPaginated<IAddressResponse>>();
+    return await api.url("/addresses/").get().json<IAddressResponse>();
   } catch {
     toast.error("Erro ao carregar endereços.");
     throw new Error("LIST_ADDRESS_ERROR");
