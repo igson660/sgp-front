@@ -7,7 +7,7 @@ import AbortAddon from "wretch/addons/abort";
 import { IWretchMiddlewareOptions } from "src/shared/types/models/wretchMiddleware.model";
 
 import {
-  DEV_API_URL,
+  // DEV_API_URL,
   PROD_API_URL,
   // SESSION_COOKIE_KEY
 } from "./constants";
@@ -35,6 +35,6 @@ const wretchMiddleware =
     return next(url, options);
   };
 
-export const api = wretch(DEV_API_URL)
+export const api = wretch(PROD_API_URL)
   .middlewares([wretchMiddleware()])
   .addon(AbortAddon());
