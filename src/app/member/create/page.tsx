@@ -12,7 +12,7 @@ import { Header } from "@/components/dashboard/Header";
 import { useCepAutoFill } from "@/shared/hooks/useCep";
 import { cleanCharacter, formatDateToISO } from "@/shared/utils/formatData";
 import z from "zod";
-import { memberSchema } from "@/shared/schemas/member.schema copy";
+import { memberSchema } from "@/shared/schemas/member.schema";
 import { createPeopleRequest } from "@/service/people.service";
 import { listCongregationRequest } from "@/service/congregation.service";
 

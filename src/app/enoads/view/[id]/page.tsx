@@ -6,10 +6,9 @@ import Link from "next/link";
 
 import { Sidebar } from "@/components/dashboard/Sidebar";
 import { Header } from "@/components/dashboard/Header";
-import { formatCPF, formatPhone } from "@/shared/utils/formatData";
 import { retrieveEnoadRequest } from "@/service/enoads.service";
 
-export default function churchViewPage() {
+export default function ChurchViewPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
 
@@ -22,143 +21,73 @@ export default function churchViewPage() {
   const church = data?.data;
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
 
       <main className="ml-64 flex-1">
-        <Header title="Visualizar Enoad" />
+        <Header title="ENOADs" />
 
-        <div className="p-8">
+        <div className="mx-auto max-w-5xl p-8">
           {isLoading ? (
-            <p>Carregando...</p>
+            <div className="flex items-center justify-center rounded-2xl bg-white p-10 shadow-sm">
+              <p className="text-gray-500">Carregando...</p>
+            </div>
           ) : !church ? (
-            <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-              <p className="text-gray-600">Membro não encontrado.</p>
+            <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
+              <p className="text-gray-600">ENOAD não encontrado.</p>
             </div>
           ) : (
-            <div className="space-y-6">
-              {/* Ações */}
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => router.push("/enoads")}
-                  className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                >
-                  Voltar
-                </button>
+            <div className="space-y-8">
+              <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
+                <h1 className="text-2xl font-semibold text-gray-800">
+                  Visualizar ENOAD
+                </h1>
 
-                <Link
-                  href={`/enoads/${church.id}`}
-                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition"
-                >
-                  Editar
-                </Link>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => router.push("/enoads")}
+                    className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-100"
+                  >
+                    Voltar
+                  </button>
+
+                  <Link
+                    href={`/enoads/${church.id}`}
+                    className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                  >
+                    Editar
+                  </Link>
+                </div>
               </div>
 
-              {/* Informações pessoais */}
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <h2 className="mb-6 text-xl font-semibold text-gray-900">
-                  Informações do Enoad
+              <div className="rounded-2xl bg-white p-8 shadow-sm">
+                <h2 className="mb-8 text-lg font-semibold text-gray-800 border-b pb-4">
+                  Informações do ENOAD
                 </h2>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Nome</p>
-                    <p className="mt-1 text-gray-900">{church.name || "-"}</p>
+                <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Nome
+                    </p>
+                    <p className="text-gray-900">{church.name || "-"}</p>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">CPF</p>
-                    <p className="mt-1 text-gray-900">
-                      {formatCPF(church.cnpj) || "-"}
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Data de Fundação
                     </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Data de nascimento
-                    </p>
-                    <p className="mt-1 text-gray-900">
+                    <p className="text-gray-900">
                       {church.foundation_date || "-"}
                     </p>
                   </div>
 
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Email</p>
-                    <p className="mt-1 text-gray-900">{church.email || "-"}</p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Telefone
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">
+                      Status
                     </p>
-                    <p className="mt-1 text-gray-900">
-                      {formatPhone(church.phone) || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <p className="mt-1 text-gray-900">
+                    <p className="text-gray-900">
                       {church.status === "active" ? "Ativo" : "Inativo"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-                <h2 className="mb-6 text-xl font-semibold text-gray-900">
-                  Endereço
-                </h2>
-
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">CEP</p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.zip_code || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Rua</p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.address || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Número</p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.address_number || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">
-                      Complemento
-                    </p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.address_complement || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Cidade</p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.city || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Estado</p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.state || "-"}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">País</p>
-                    <p className="mt-1 text-gray-900">
-                      {church.address?.country || "-"}
                     </p>
                   </div>
                 </div>

@@ -18,7 +18,7 @@ import {
 
 import z from "zod";
 import { listRegionalRequest } from "@/service/regional.service";
-import { memberSchema } from "@/shared/schemas/member.schema copy";
+import { memberSchema } from "@/shared/schemas/member.schema";
 import {
   retrievePeopleRequest,
   updatePeopleRequest,

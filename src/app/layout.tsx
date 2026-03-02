@@ -7,7 +7,9 @@ export const metadata: Metadata = {
   title: "CONFRADAC Dashboard",
   description: "Dashboard da Confederação de Igrejas",
   icons: {
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" font-weight="bold" fill="%236366f1">C</text></svg>',
+    icon: "/image/logo_confredac.png",
+    shortcut: "/image/logo_confredac.png",
+    apple: "/image/logo_confredac.png",
   },
 };
 

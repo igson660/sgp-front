@@ -1,21 +1,11 @@
-import {
-  IAddressCreate,
-  IAddressItem,
-  IAddressResponseList,
-} from "./address.model";
-
 export interface IEnoadBase {
   readonly name: string;
-  readonly cnpj: string;
   readonly foundation_date: string;
-  readonly email: string;
-  readonly phone: string;
   readonly status: "active" | "inactive";
 }
 
 export interface IEnoadItem extends IEnoadBase {
   readonly id: string;
-  readonly address: IAddressResponseList | IAddressItem;
 }
 
 export interface IEnoadData {
@@ -26,9 +16,7 @@ export interface IEnoadData {
   readonly total_pages: number;
 }
 
-export interface IEnoadCreate extends IEnoadBase {
-  readonly address: IAddressCreate;
-}
+export interface IEnoadCreate extends IEnoadBase {}
 
 export interface IEnoadResponse {
   readonly status: "success";

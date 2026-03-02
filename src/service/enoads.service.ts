@@ -25,8 +25,8 @@ export const listEnoadRequest = async ({
       .get()
       .json<IEnoadResponse>();
   } catch {
-    toast.error("Erro ao carregar congregação.");
-    throw new Error("LIST_CONGREGATION_ERROR");
+    toast.error("Erro ao carregar ENOAD.");
+    throw new Error("LIST_ENOAD_ERROR");
   }
 };
 

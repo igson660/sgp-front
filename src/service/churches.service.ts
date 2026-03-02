@@ -26,8 +26,8 @@ export const listChurchRequest = async ({
       .get()
       .json<IChurchResponse>();
   } catch {
-    toast.error("Erro ao carregar congregação.");
-    throw new Error("LIST_CONGREGATION_ERROR");
+    toast.error("Erro ao carregar Igreja.");
+    throw new Error("LIST_CHURCH_ERROR");
   }
 };
 

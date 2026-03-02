@@ -49,7 +49,7 @@ export const createPeopleRequest = async (
     return await api.url("people/").post(data).json<IPeopleResponse>();
   } catch {
     toast.error("Erro ao cadastrar membro.");
-    throw new Error("CREATE_CONGRATION_ERROR");
+    throw new Error("CREATE_MEMBER_ERROR");
   }
 };
 
