@@ -14,7 +14,6 @@ import {
   retrieveEnoadRequest,
   updateEnoadRequest,
 } from "@/service/enoads.service";
-import { useCepAutoFill } from "@/shared/hooks/useCep";
 import {
   formatDateToISO,
   formatDateFromISO,
